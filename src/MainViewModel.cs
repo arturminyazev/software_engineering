@@ -1,5 +1,6 @@
 using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.IO;
 
 namespace Blackjack;
 
@@ -7,6 +8,7 @@ namespace Blackjack;
 public class MainViewModel : INotifyPropertyChanged
 {
     private readonly BlackjackGame game;
+    private readonly HistorySaver historySaver = new HistorySaver();
 
     public string PlayerText { get { return DescribeHand(game.PlayerHand); } }
     public string DealerText
@@ -45,6 +47,10 @@ public class MainViewModel : INotifyPropertyChanged
     public RelayCommand HitCommand { get; }
     public RelayCommand StandCommand { get; }
     public RelayCommand SummaryCommand { get; }
+    public AsyncRelayCommand SaveHistoryCommand { get; }
+
+    // Окно выбирает путь, ViewModel сохраняет сообщения. null означает отмену.
+    public Func<string?>? ChooseHistoryPath { get; set; }
 
     public event PropertyChangedEventHandler? PropertyChanged;
     public event Action<string>? AnnouncementRequested;
@@ -63,6 +69,8 @@ public class MainViewModel : INotifyPropertyChanged
         HitCommand = new RelayCommand(() => ExecuteGameAction(game.Hit), () => game.CanHit);
         StandCommand = new RelayCommand(() => ExecuteGameAction(game.Stand), () => game.CanStand);
         SummaryCommand = new RelayCommand(() => Announce(game.GetSummary()));
+        SaveHistoryCommand = new AsyncRelayCommand(SaveHistoryAsync, () => History.Count > 0);
+        History.CollectionChanged += (_, _) => SaveHistoryCommand.UpdateCanExecute();
 
         foreach (string message in game.History)
             History.Add(message);
@@ -71,6 +79,27 @@ public class MainViewModel : INotifyPropertyChanged
         game.Changed += UpdateDisplay;
         game.MessageAdded += History.Add;
         game.RoundEnded += outcome => ResultSoundRequested?.Invoke(outcome);
+    }
+
+    private async Task SaveHistoryAsync()
+    {
+        try
+        {
+            string? path = ChooseHistoryPath?.Invoke();
+            if (path == null)
+                return;
+
+            // Сохраняем снимок: новые ходы не изменят уже начатую запись.
+            string[] messages = History.ToArray();
+            Announce("Сохраняется история сообщений.");
+            await historySaver.SaveAsync(path, messages);
+            Announce($"История сохранена. Файл: {path}");
+        }
+        catch (Exception error) when (error is IOException or UnauthorizedAccessException
+            or ArgumentException or NotSupportedException)
+        {
+            Announce($"Не удалось сохранить историю. {error.Message}");
+        }
     }
 
     private static string DescribeHand(Hand hand)
