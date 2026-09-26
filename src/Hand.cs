@@ -10,7 +10,32 @@ public class Hand
         get { return Cards.Count; }
     }
 
-    // Подсчёт очков, перебор и выигрышные сочетания добавим в лабораторной 4.
+    public int Score
+    {
+        get
+        {
+            int total = 0;
+            foreach (Card card in Cards)
+                total += card.BaseValue;
+            return total;
+        }
+    }
+
+    public bool HasTwoAces
+    {
+        get { return Count == 2 && Cards[0].Rank == Rank.Ace && Cards[1].Rank == Rank.Ace; }
+    }
+
+    public bool IsBlackjack
+    {
+        get { return Count == 2 && Score == 21; }
+    }
+
+    public bool IsBust
+    {
+        // Два туза дают 22, но по нашим правилам это особое выигрышное сочетание.
+        get { return Score > 21 && !HasTwoAces; }
+    }
 
     public void AddCard(Card card)
     {

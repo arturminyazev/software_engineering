@@ -32,6 +32,28 @@ public class Card
     public Suit Suit { get; }
     public Rank Rank { get; }
 
+    // Текстовое имя вместо изображения карты: подходит для истории и скринридера.
+    public string Name
+    {
+        get
+        {
+            string rankName = Rank switch
+            {
+                Rank.Ace => "Туз", Rank.Two => "Двойка", Rank.Three => "Тройка",
+                Rank.Four => "Четвёрка", Rank.Five => "Пятёрка", Rank.Six => "Шестёрка",
+                Rank.Seven => "Семёрка", Rank.Eight => "Восьмёрка", Rank.Nine => "Девятка",
+                Rank.Ten => "Десятка", Rank.Jack => "Валет", Rank.Queen => "Дама",
+                Rank.King => "Король", _ => "Неизвестная карта"
+            };
+            string suitName = Suit switch
+            {
+                Suit.Clubs => "треф", Suit.Diamonds => "бубен",
+                Suit.Hearts => "червей", Suit.Spades => "пик", _ => ""
+            };
+            return $"{rankName} {suitName}";
+        }
+    }
+
     public int BaseValue
     {
         get

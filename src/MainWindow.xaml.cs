@@ -1,4 +1,5 @@
 using System.Runtime.InteropServices;
+using System.Media;
 using System.Windows;
 using System.Windows.Automation;
 using System.Windows.Automation.Peers;
@@ -17,6 +18,7 @@ public partial class MainWindow : Window
         // Все {Binding ...} в окне получают данные из этого объекта.
         DataContext = viewModel;
         viewModel.AnnouncementRequested += AnnounceToScreenReader;
+        viewModel.ResultSoundRequested += PlayResultSound;
     }
 
     private void Window_Loaded(object sender, RoutedEventArgs e)
@@ -34,9 +36,27 @@ public partial class MainWindow : Window
 
         // Если нажатая кнопка стала недоступна, оставляем фокус на доступном действии.
         if (Keyboard.FocusedElement == HitButton && !HitButton.IsEnabled)
-            StandButton.Focus();
+        {
+            if (StandButton.IsEnabled)
+                StandButton.Focus();
+            else
+                NewRoundButton.Focus();
+        }
         else if (Keyboard.FocusedElement == StandButton && !StandButton.IsEnabled)
             NewRoundButton.Focus();
+        else if (Keyboard.FocusedElement == NewRoundButton && !NewRoundButton.IsEnabled)
+            HitButton.Focus();
+    }
+
+    private void PlayResultSound(RoundOutcome outcome)
+    {
+        // Звук дополняет текст; точный результат всегда доступен скринридеру.
+        if (outcome == RoundOutcome.Win)
+            SystemSounds.Asterisk.Play();
+        else if (outcome == RoundOutcome.Loss)
+            SystemSounds.Hand.Play();
+        else
+            SystemSounds.Beep.Play();
     }
 
     private void Window_PreviewKeyDown(object sender, KeyEventArgs e)
@@ -99,8 +119,12 @@ public partial class MainWindow : Window
     private void ShowHelp()
     {
         MessageBox.Show(this,
-            "Это демонстрация интерфейса, а не готовая игра. Карты и очки заранее заданы.\n\n" +
-            "Ctrl+N — новая раздача.\nCtrl+H — взять демонстрационную карту.\n" +
+            "Туз всегда стоит 11, картинки — 10, остальные карты — по номиналу.\n" +
+            "Ровно два туза сильнее блэкджека. Блэкджек — 21 на первых двух картах.\n" +
+            "Одинаковые особые сочетания дают ничью. С тремя картами исключение двух тузов не действует.\n" +
+            "Дилер берёт карту при 17 и меньше, останавливается на 18–21.\n" +
+            "При 21 очке ваш ход завершается автоматически. Перебор завершает раунд проигрышем.\n\n" +
+            "Ctrl+N — новая раздача, доступна после завершения текущего раунда.\nCtrl+H — взять карту.\n" +
             "Ctrl+J — остановиться.\nCtrl+I — повторить сводку без переноса фокуса.\n" +
             "Ctrl+L — перейти в историю.\nF1 — эта справка.\n\n" +
             "Tab и Shift+Tab — переход по элементам. Enter или пробел — нажать кнопку.\n" +

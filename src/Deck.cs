@@ -1,6 +1,6 @@
 namespace Blackjack;
 
-// Колода из 52 карт. Перемешивание добавим в лабораторной 4.
+// Колода хранит оставшиеся карты и умеет перемешиваться.
 public class Deck
 {
     private List<Card> cards = new List<Card>();
@@ -16,6 +16,27 @@ public class Deck
         {
             foreach (Rank rank in Enum.GetValues<Rank>())
                 cards.Add(new Card(suit, rank));
+        }
+    }
+
+    // Для проверок можно создать колоду с известным порядком карт.
+    public Deck(IEnumerable<Card> orderedCards)
+    {
+        ArgumentNullException.ThrowIfNull(orderedCards);
+        cards = new List<Card>(orderedCards);
+        if (cards.Any(card => card == null))
+            throw new ArgumentException("В колоде не должно быть пустых карт.", nameof(orderedCards));
+    }
+
+    public void Shuffle()
+    {
+        // Фишер — Йетс: меняем каждую карту со случайной картой из ещё не обработанной части.
+        for (int i = cards.Count - 1; i > 0; i--)
+        {
+            int j = Random.Shared.Next(i + 1);
+            Card temporary = cards[i];
+            cards[i] = cards[j];
+            cards[j] = temporary;
         }
     }
 

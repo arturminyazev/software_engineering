@@ -1,7 +1,7 @@
 <Window x:Class="Blackjack.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="Блэкджек — учебный интерфейс" Language="ru-RU"
+        Title="Блэкджек — доступная игра" Language="ru-RU"
         Width="920" Height="820" MinWidth="640" MinHeight="600"
         FontFamily="Segoe UI" FontSize="18" WindowStartupLocation="CenterScreen"
         Background="{DynamicResource {x:Static SystemColors.WindowBrushKey}}"
@@ -39,7 +39,7 @@
                   Focusable="False" Padding="24,20">
         <StackPanel>
             <TextBlock Text="Блэкджек" FontSize="30" FontWeight="SemiBold" />
-            <TextBlock Text="Учебный пример: карты заранее заданы, правила игры ещё не подключены."
+            <TextBlock Text="Туз — 11. Два туза — особое сочетание. Дилер берёт карту при 17 и меньше."
                        TextWrapping="Wrap" Margin="0,6,0,16" />
 
             <WrapPanel>
@@ -47,12 +47,12 @@
                         Command="{Binding NewRoundCommand}" TabIndex="0"
                         AutomationProperties.Name="Новая раздача"
                         AutomationProperties.AcceleratorKey="Ctrl+N"
-                        AutomationProperties.HelpText="Начать демонстрационный раунд с заранее заданными картами." />
+                        AutomationProperties.HelpText="Начать раунд с новой перемешанной колодой. Доступно до игры или после завершения раунда." />
                 <Button x:Name="HitButton" Content="Взять карту (Ctrl+H)"
                         Command="{Binding HitCommand}" TabIndex="1"
                         AutomationProperties.Name="Взять карту"
                         AutomationProperties.AcceleratorKey="Ctrl+H"
-                        AutomationProperties.HelpText="В этом примере можно взять одну дополнительную карту." />
+                        AutomationProperties.HelpText="Взять следующую карту из колоды. Доступно во время вашего хода." />
                 <Button x:Name="StandButton" Content="Остановиться (Ctrl+J)"
                         Command="{Binding StandCommand}" TabIndex="2"
                         AutomationProperties.Name="Остановиться"
